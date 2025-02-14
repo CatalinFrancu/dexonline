@@ -168,45 +168,14 @@ $(function() {
     return false;
   }
 
-  // TODO this duplicates some code from main.js:searchClickedWord()
   function prepareTypo(evt) {
     var id = evt.data.param;
-    //if ($(event.target).is('abbr')) return false;
-    var s = window.getSelection();
 
-    //if (!s.isCollapsed) return false;
-    var begin = /^\s/;
-    var end = /\s$/;
+    var sel = searchClickedWord(evt, false);
+    if (!sel) {
+      return;
+    }
 
-    var	d = document,
-        nA = s.anchorNode,
-        oA = s.anchorOffset,
-        nF = s.focusNode,
-        oF = s.focusOffset,
-        range = d.createRange();
-
-    range.setStart(nA,oA);
-    range.setEnd(nF,oF);
-
-    // Extend range to the next space or end of node
-    while(range.endOffset < range.endContainer.textContent.length &&
-          !end.test(range.toString())){
-            range.setEnd(range.endContainer, range.endOffset + 1);
-          }
-    // Extend range to the previous space or start of node
-    while(range.startOffset > 0 &&
-          !begin.test(range.toString())){
-            range.setStart(range.startContainer, range.startOffset - 1);
-          }
-
-    // Remove spaces
-    if(end.test(range.toString()) && range.endOffset > 0)
-      range.setEnd(range.endContainer, range.endOffset - 1);
-    if(begin.test(range.toString()))
-      range.setStart(range.startContainer, range.startOffset + 1);
-
-    // Assign range to selection
-    var sel = range.toString();
     var txt = $('#typoText_'+id).val();
     txt += txt ? ' • ' : '';
     $('#typoText_'+id).val(txt + sel);

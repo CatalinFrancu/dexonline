@@ -168,19 +168,39 @@ function shownTypoModal(event) {
   $('#typoSubmit').removeData('submitted'); // allow clicking the button again
 }
 
-function submitTypoForm() {
-  var text = $('#typoTextarea').val();
-  var defId = $('input[name="definitionId"]').val();
-  $.post(wwwRoot + 'ajax/typo.php',
-         { definitionId: defId, text: text, submit: 1 },
-         function() {
-           $('#typoModal').modal('hide');
-           $('#typoTextarea').val('');
-           var confModal = new bootstrap.Modal($('#typoConfModal'));
-           confModal.show();
-         });
+function submitTypoForm(event) {
+  event.preventDefault();
+
+  var triggerButton = document.activeElement;
+
+  if ($(triggerButton).is('#typoSubmit')) {
+    var text = $('#typoTextarea').val();
+    var defId = $('input[name="definitionId"]').val();
+
+    if (!text.trim()) {
+      alert('Vă rugăm descrieți problema în maximum 400 de caractere.');
+      return false;
+    }
+
+    $.post(
+      wwwRoot + 'ajax/typo.php',
+      { definitionId: defId, text: text, submit: 1 },
+      function () {
+        $('#typoModal').modal('hide');
+        $('#typoTextarea').val('');
+        var confModal = new bootstrap.Modal($('#typoConfModal'));
+        confModal.show();
+      }
+    );
+  } else {
+    $('#typoModal').modal('hide');
+  }
+
   return false;
 }
+
+// Attach the submit event to the form. If deleted, it will refresh the page.
+$(document).on('submit', '#typoHtmlForm', submitTypoForm);
 
 function toggle(id) {
   $('#' + id).stop().slideToggle();
@@ -205,7 +225,7 @@ function endsWith(str, sub) {
 }
 
 /* adapted from http://stackoverflow.com/questions/7563169/detect-which-word-has-been-clicked-on-within-a-text */
-function searchClickedWord(event) {
+function searchClickedWord(event, redirect = true) {
   if ($(event.target).is('abbr')) return false;
   if ($(event.target).is('a')) {
     console.log(event.target.href);
@@ -251,7 +271,11 @@ function searchClickedWord(event) {
   }
 
   if (word) {
-    window.location = wwwRoot + 'definitie' + source + '/' + encodeURIComponent(word);
+    if (redirect) {
+      window.location = wwwRoot + 'definitie' + source + '/' + encodeURIComponent(word);
+    } else {
+      return word;
+    }
   }
 }
 
